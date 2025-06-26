@@ -12,9 +12,7 @@ import requests
 # ─────────────────────────────────────────────────────────────
 # Tavily API Setup
 # ─────────────────────────────────────────────────────────────
-TAVILY_API_KEY = "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"
-
-
+TAVILY_API_KEY = st.secrets["TAVILY_API_KEY"]
 
 def get_apollo_product_description(product_name):
     query = f"{product_name} site:apollopharmacy.in"
@@ -150,7 +148,6 @@ if uploaded_file:
     plt.xticks(rotation=30)
     st.pyplot(fig)
 
-    # Check for deficit or surplus based on last month's actual vs forecast first month
     last_month_actual = full_series[-1]
     next_month_forecast = forecast_actual[0]
     if next_month_forecast > last_month_actual:

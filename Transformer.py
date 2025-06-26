@@ -12,7 +12,8 @@ import requests
 # ─────────────────────────────────────────────────────────────
 # Tavily API Setup
 # ─────────────────────────────────────────────────────────────
-TAVILY_API_KEY = st.secrets["TAVILY_API_KEY"]
+TAVILY_API_KEY = "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"
+
 
 
 def get_apollo_product_description(product_name):

@@ -61,17 +61,16 @@ def arima_forecast(series):
 
 def sarima_forecast(series):
     if len(series) < 24 or series.std() == 0:
-        return pd.Series([series.mean() * 1.10] * forecast_horizon,
+        return pd.Series([series.mean()] * forecast_horizon,
                          index=pd.date_range(series.index[-1] + pd.offsets.MonthBegin(), periods=forecast_horizon, freq='M'))
     try:
         model = SARIMAX(series, order=(1, 1, 1), seasonal_order=(1, 1, 1, 12), enforce_stationarity=False, enforce_invertibility=False)
         result = model.fit(disp=False)
         forecast = result.forecast(steps=forecast_horizon)
-        return pd.Series(forecast.values * 1.10,
-                         index=pd.date_range(series.index[-1] + pd.offsets.MonthBegin(), periods=forecast_horizon, freq='M'))
+        return pd.Series(forecast.values, index=pd.date_range(series.index[-1] + pd.offsets.MonthBegin(), periods=forecast_horizon, freq='M'))
     except Exception as e:
         print(f"SARIMA fallback: {e}")
-        return pd.Series([series.mean() * 1.10] * forecast_horizon,
+        return pd.Series([series.mean()] * forecast_horizon,
                          index=pd.date_range(series.index[-1] + pd.offsets.MonthBegin(), periods=forecast_horizon, freq='M'))
 
 def lstm_forecast(series):
@@ -90,7 +89,7 @@ def lstm_forecast(series):
         Dense(1)
     ])
     model.compile(optimizer='adam', loss='mse')
-    model.fit(X, y, epochs=100, verbose=0)
+    model.fit(X, y, epochs=50, verbose=0)
 
     last_seq = scaled[-12:].reshape(1, 12, 1)
     predictions = []
@@ -101,9 +100,16 @@ def lstm_forecast(series):
     forecast = scaler.inverse_transform(np.array(predictions).reshape(-1, 1)).flatten()
     return pd.Series(forecast, index=pd.date_range(series.index[-1] + pd.offsets.MonthBegin(), periods=forecast_horizon, freq='M'))
 
-def check_deficit_or_sufficient(total, forecasted):
-    buffer_stock = total + (0.15 * total)
-    return ["Deficit" if forecasted[i] > buffer_stock else "Sufficient" for i in range(len(forecasted))]
+def check_stock_status(total, forecasted):
+    status = []
+    for f in forecasted:
+        buffer_forecast = f * 1.15
+        buffer_total = total + 0.5 * total
+        if buffer_total - buffer_forecast < f:
+            status.append("Deficit")
+        else:
+            status.append("Sufficient")
+    return status
 
 def plot_forecast(original, forecast_dict):
     if st.get_option("theme.base") == "light":
@@ -134,7 +140,7 @@ def plot_forecast(original, forecast_dict):
     st.pyplot(fig)
 
 # ───────────────────────────────
-# Main Logic
+# Main App Logic
 # ───────────────────────────────
 if uploaded_file:
     df = pd.read_excel(uploaded_file)
@@ -168,7 +174,7 @@ if uploaded_file:
     st.subheader("📈 Model Performance Summary")
     st.dataframe(pd.DataFrame(results))
 
-    # ────────── Bulk Forecasting ──────────
+    # ─────── Bulk Forecasting ───────
     if st.button("📦 Generate Forecasts for All SKUs"):
         st.info("Running full dataset forecast, please wait...")
 
@@ -186,7 +192,7 @@ if uploaded_file:
             else:
                 pred = sarima_forecast(product_series)
 
-            status = check_deficit_or_sufficient(total, pred) if not np.isnan(total) else ["N/A"] * len(pred)
+            status = check_stock_status(total, pred) if not np.isnan(total) else ["N/A"] * len(pred)
             export_df = pd.DataFrame({
                 "ITEM CODE": item_code,
                 "ITEM NAME": item_name,

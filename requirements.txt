@@ -1,8 +1,8 @@
+streamlit
 pandas
 numpy
-streamlit
 matplotlib
-scikit-learn
-tensorflow==2.11.0
-statsmodels==0.13.5
 openpyxl
+scikit-learn
+tensorflow
+statsmodels

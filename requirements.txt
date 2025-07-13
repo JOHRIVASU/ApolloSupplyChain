@@ -1,11 +1,12 @@
-# Core libraries
-pandas
-numpy
-streamlit
-matplotlib
-openpyxl
+# Core Libraries
+pandas==2.1.0
+numpy==1.26.0
+streamlit==1.27.0
+matplotlib==3.8.0
+openpyxl==3.1.2
 
-# Machine learning and forecasting
+# Machine Learning & Forecasting
 scikit-learn==1.3.2
 statsmodels==0.14.0
-tensorflow-cpu==2.11.0
+tensorflow-cpu==2.15.0  # Latest stable for Python 3.10
+protobuf==3.20.*  # Prevents TensorFlow compatibility issues

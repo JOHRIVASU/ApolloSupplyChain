@@ -1,8 +1,11 @@
+# Core libraries
 pandas
 numpy
 streamlit
 matplotlib
-scikit-learn
 openpyxl
-tensorflow==2.11.0
-statsmodels
+
+# Machine learning and forecasting
+scikit-learn==1.3.2
+statsmodels==0.14.0
+tensorflow-cpu==2.11.0
